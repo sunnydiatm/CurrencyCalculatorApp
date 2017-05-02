@@ -11,6 +11,9 @@ public interface CurrencyCalculatorConstant {
 	//Max input string length 
 	public static final int INPUT_ARGUMENT_LENGTH = 4 ;
 	
+	//argument string 
+	public static final String INPUT_ARGUMENT_STRING = "in" ;
+	
 	//Generic decimal place
 	public static final int GENERIC_DECIMAL_PLACE = 10 ;
 	

@@ -11,7 +11,7 @@ import currency.calculator.app.exception.CurrencyException;
 
 /**
  * This class contains all methods which helps calculating exchange rate from property value
- * @Operations: calculateRate, convertStringToBigDecimal, isCurrencyAvailable and several utility/helper methods
+ * @Operations: calculateCurrencyValue, convertStringToBigDecimal, isCurrencyAvailable, getDecimalPlace, getFXRates, fetchCrossCurrencyValue, calculateRateFromCrossCurrency and calculateRateByCrossCurrency - utility/helper methods
  * @Developer: Singh, Sunny 
  */
 public class CurrencyCalculatorUtil {
@@ -24,7 +24,6 @@ public class CurrencyCalculatorUtil {
 	 * @Response - BigDecimal
 	 * @Exception - CurrencyException
 	 */
-	
 	public static BigDecimal calculateCurrencyValue(String sourceCurrency, String inputAmount, String destinationCurrency) throws CurrencyException{
 		if(LOG.isLoggable(Level.INFO)){
 			LOG.info("CurrencyCalculatorUtil->calculateCurrencyValue()-> Enters to calculate rate ");
@@ -130,8 +129,7 @@ public class CurrencyCalculatorUtil {
 	 * @Response - int
 	 * @Exception - CurrencyException
 	 */
-	
-	private static int getDecimalPlace(String currency)throws CurrencyException{
+	public static int getDecimalPlace(String currency)throws CurrencyException{
 		int result = 0;
 		/*
 		 * Validating the input provided for this method
@@ -140,7 +138,7 @@ public class CurrencyCalculatorUtil {
 			/*
 			 * Switch case statement for calculating the decimal places with the provided currency. 
 			*/	
-			switch(currency){
+			switch(currency.trim()){
 				case CurrencyCalculatorConstant.CURRENCY_AUD:
 					result =  CurrencyCalculatorConstant.AUD_DECIMAL_PLACE;
 					break;
@@ -199,8 +197,7 @@ public class CurrencyCalculatorUtil {
 	 * @Response - double
 	 * @Exception - CurrencyException
 	 */
-	
-	private static double getFXRates(String inputCurrency) throws CurrencyException {
+	public static double getFXRates(String inputCurrency) throws CurrencyException {
 		double result = 0.0;
 		/*
 		 * Validating the input provided for this method
@@ -258,6 +255,7 @@ public class CurrencyCalculatorUtil {
 		}
 		return result;
 	}
+	
 	/**
 	 * The following operation checks if the input currency by user exists or not
 	 * @Input - currency
@@ -273,7 +271,7 @@ public class CurrencyCalculatorUtil {
 			/*
 			 * Switch case statement for checking currency availability. If found, it return boolean value back to caller.
 			*/
-			switch(currency){
+			switch(currency.trim()){
 			case CurrencyCalculatorConstant.CURRENCY_AUD:
 				flag = true;
 				break;
@@ -326,13 +324,13 @@ public class CurrencyCalculatorUtil {
 		}
 		return flag;
 	}
+	
 	/**
 	 * The following operation fetches value from map against given Key
 	 * @Input - sourceCurrency, destinationCurrency
 	 * @Response - String
 	 * @Exception - CurrencyException
 	 */
-	
 	private static String fetchValueFromCrossMatrixKey(String sourceCurrency, String destinationCurrency) throws CurrencyException{
 		String value = null;
 		/*
@@ -349,8 +347,8 @@ public class CurrencyCalculatorUtil {
 			/*
 			 * This checks if map contains the key provided.If found, return the value of corresponding key. 
 			*/
-			if(!mapCurrency.isEmpty() && mapCurrency.containsKey(key)){
-				value = mapCurrency.get(key);
+			if(!mapCurrency.isEmpty() && mapCurrency.containsKey(key.toUpperCase())){
+				value = mapCurrency.get(key.toUpperCase());
 				if(LOG.isLoggable(Level.INFO)){
 					LOG.info("CurrencyCalculatorUtil->fetchValueFromCrossMatrixKey()-> Value : "+ value + " found against key : "+key);
 				}
@@ -371,8 +369,7 @@ public class CurrencyCalculatorUtil {
 	 * @Response - String
 	 * @Exception - CurrencyException
 	 */
-	
-	private static String fetchCrossCurrencyValue(String sourceCurrency, String destinationCurrency) throws CurrencyException{
+	public static String fetchCrossCurrencyValue(String sourceCurrency, String destinationCurrency) throws CurrencyException{
 		/*
 		 * Validating the input provided for this method
 		 */
@@ -395,7 +392,7 @@ public class CurrencyCalculatorUtil {
 	 * @Response - BigDecimal
 	 * @Exception - CurrencyException
 	 */
-	private static BigDecimal calculateRateFromCrossCurrency(String sourceCurrency, String destinationCurrency, String inputAmount, String crossCurrency) throws CurrencyException{
+	public static BigDecimal calculateRateFromCrossCurrency(String sourceCurrency, String destinationCurrency, String inputAmount, String crossCurrency) throws CurrencyException{
 		BigDecimal finalFXResult = BigDecimal.ZERO;
 		/*
 		 * Validating the input provided for this method
@@ -466,7 +463,7 @@ public class CurrencyCalculatorUtil {
 	 * @Response - BigDecimal
 	 * @Exception - CurrencyException 
 	 */
-	private static BigDecimal calculateRateByCrossCurrency(String sourceCurrency, String destinationCurrency, String crossRefCurrency ) throws CurrencyException{
+	public static BigDecimal calculateRateByCrossCurrency(String sourceCurrency, String destinationCurrency, String crossRefCurrency ) throws CurrencyException{
 		/*
 		 * Initializing BigDecimal variable to zero which will be used for storing values. 
 		*/
@@ -477,11 +474,6 @@ public class CurrencyCalculatorUtil {
 		if( sourceCurrency!=null && !sourceCurrency.equals("")
 								 && crossRefCurrency!=null && !crossRefCurrency.equals("")
 								 && destinationCurrency!=null && !destinationCurrency.equals("")){
-			/*
-			 * Validating input request. Cross reference currency must not be null or blank i.e it must contain a value. This is an extra check in case 
-			 * in case cross currency is null or blank 
-			 */
-			if(crossRefCurrency != null && !crossRefCurrency.equals("")){
 				/*
 				 * Switch case statement for calculating the exchange rate of intended currency. 
 				*/	
@@ -515,20 +507,18 @@ public class CurrencyCalculatorUtil {
 					String firstPartCrossRefCurrency = fetchCrossCurrencyValue(sourceCurrency, crossRefCurrency);
 					String secondPartCrossRefCurrency = fetchCrossCurrencyValue(crossRefCurrency, destinationCurrency);
 					/*
-					 *  Checks first part of the cross reference currency does not return null or blank ie. it contains a value. 
+					 *  Checks first part of the cross reference currency does not return null or blank ie. it contains a value. Here the method is recursively calls itself. 
 					*/
 					if(firstPartCrossRefCurrency != null && !firstPartCrossRefCurrency.equals("")){
-						//firstPartFXResult = rateByCrossCurrency(sourceCurrency,crossRefCurrency, firstPartCrossRefCurrency);
 						firstPartFXResult = calculateRateByCrossCurrency(sourceCurrency,crossRefCurrency, firstPartCrossRefCurrency);
 						if(LOG.isLoggable(Level.INFO)){
 							LOG.info("CurrencyCalculatorUtil->calculateRateByCrossCurrency()-> "+firstPartFXResult);
 						}
 					}
 					/*
-					 * Checks second part of the cross reference currency does not return null or blank ie. it contains a value. 
+					 * Checks second part of the cross reference currency does not return null or blank ie. it contains a value. Here the method is recursively calls itself.
 					*/
 					if(secondPartCrossRefCurrency != null && !secondPartCrossRefCurrency.equals("")){
-						//secondPartFXResult = rateByCrossCurrency(crossRefCurrency,destinationCurrency, secondPartCrossRefCurrency);
 						secondPartFXResult = calculateRateByCrossCurrency(crossRefCurrency,destinationCurrency, secondPartCrossRefCurrency);
 						if(LOG.isLoggable(Level.INFO)){
 							LOG.info("CurrencyCalculatorUtil->calculateRateByCrossCurrency()-> "+secondPartFXResult);
@@ -541,17 +531,13 @@ public class CurrencyCalculatorUtil {
 						secondPartFXResult = ONE.divide(secondPartFXResult, CurrencyCalculatorConstant.GENERIC_DECIMAL_PLACE, RoundingMode.HALF_UP);
 						resultFX = firstPartFXResult.divide(secondPartFXResult,CurrencyCalculatorConstant.GENERIC_DECIMAL_PLACE, RoundingMode.HALF_UP);
 						if(LOG.isLoggable(Level.INFO)){
-							LOG.info("CurrencyCalculatorUtil->calculateRateByCrossCurrency()-> final "+resultFX);
+							LOG.info("CurrencyCalculatorUtil->calculateRateByCrossCurrency()-> "+resultFX);
 						}
 					}
 				}
 			/*
 			* Validation of input request fails then throw CurrencyException with required information.
 			*/	
-			}else{
-				LOG.severe("CurrencyCalculatorUtil->calculateRateByCrossCurrency()-> No cross currency detail provided ");
-				throw new CurrencyException("Cross Currency provided is null or blank","CurrencyCalculatorUtil->calculateRateByCrossCurrency()-> No cross currency detail provided ",CurrencyCalculatorConstant.EXCEPTION_SYSTEM);
-			}
 		}else {
 			LOG.severe("CurrencyCalculatorUtil->calculateRateByCrossCurrency()-> Invalid input provided -> Null input provided , sourceCurrency : "+sourceCurrency+", crossRefCurrency : "+crossRefCurrency+", destinationCurrency : "+destinationCurrency);
 			throw new CurrencyException("Input field provided is not valid ","CurrencyCalculatorUtil->calculateRateByCrossCurrency()-> Invalid input provided ",CurrencyCalculatorConstant.EXCEPTION_SYSTEM);

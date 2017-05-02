@@ -19,7 +19,7 @@ import currency.calculator.app.exception.CurrencyException;
  * @Developer: Singh, Sunny 
  */
 
-public class LoadProperty {
+public final class LoadProperty {
 	
 	private static final Logger LOG = Logger.getLogger(LoadProperty.class.getName());
 	
@@ -72,12 +72,12 @@ public class LoadProperty {
 	 */
 	public static HashMap<String, String> getFXPropValue() throws CurrencyException{
 		
-		/**Create new instance only when no existing instance exists. 
+		/* Create new instance only when no existing instance exists. 
 		 * This is just to make sure only one instance of this class exists throughout 
 		 * the application life cycle to ensure singleton pattern.  
-		**/
+		*/
 		
-		 if (propInstance == null) {
+		 if(propInstance == null) {
 			 	new LoadProperty();
 	        }
 	       return propInstance;

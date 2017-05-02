@@ -24,9 +24,7 @@ public class CurrencyCalculatorMainApp {
 	  * @Response - only print the details to user.
 	  * @Exception - CurrencyException
 	*/
-    public static void main( String[] argss ) throws CurrencyException{
-    	//used for testing purpose
-    	String[] args = { "AUD", "ASD", "in", "JPY" };
+    public static void main( String[] args ) throws CurrencyException{
     	 if(LOG.isLoggable(Level.INFO)){
     		 LOG.info("App->main()-> Input String length is : "+args.length);
     	 }
@@ -37,8 +35,9 @@ public class CurrencyCalculatorMainApp {
     	 if(args.length > 0 && args.length == CurrencyCalculatorConstant.INPUT_ARGUMENT_LENGTH 
     			 			&& args[0]!= null && !args[0].equals("") 
     			 			&& args[1]!= null && !args[1].equals("")
-    			 			&& NumberUtils.isNumber(args[1].replaceAll(",", ""))
+    			 			&& NumberUtils.isNumber(args[1].replaceAll(",", "")) //Removing all the comma separated value before checking for number
     			 			&& args[2]!= null && !args[2].equals("")
+    			 			&& args[2].equalsIgnoreCase(CurrencyCalculatorConstant.INPUT_ARGUMENT_STRING) //This checks if input 3rd argument is "in" or not.
     			 			&& args[3]!= null && !args[3].equals("")){
     		if(CurrencyCalculatorUtil.isCurrencyAvailable(args[0].toUpperCase()) && CurrencyCalculatorUtil.isCurrencyAvailable(args[3].toUpperCase())){
 		    	try{

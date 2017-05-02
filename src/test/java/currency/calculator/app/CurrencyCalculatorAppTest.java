@@ -27,6 +27,8 @@ public class CurrencyCalculatorAppTest extends TestCase
     {
         super( testName );
     }
+ 
+    // Test for convertStringToBigDecimal Method
     
     @Test
     public void testConvertStringToBigDecimal()throws CurrencyException {
@@ -35,17 +37,29 @@ public class CurrencyCalculatorAppTest extends TestCase
        assertEquals(100.25, d , 0.0);
     }
     @Test
-     public void testConvertStringToBigDecimalNegativeInput() throws CurrencyException{
+     public void testConvertStringToBigDecimalWithNegativeInput() throws CurrencyException{
     	BigDecimal big = CurrencyCalculatorUtil.convertStringToBigDecimal("-100.25");
     	double d = big.doubleValue();
     	assertNotSame(100.25, d);
     }
     @Test
-    public void testConvertStringToBigDecimalInvalidInput() throws CurrencyException{
+    public void testConvertStringToBigDecimalWithInvalidInput() throws CurrencyException{
     	BigDecimal big = CurrencyCalculatorUtil.convertStringToBigDecimal("100,00");
     	double d = big.doubleValue();
     	assertNotSame(10000, d);
    }
+    @Test
+    public void testConvertStringToBigDecimalWithNull() throws CurrencyException {
+    	try{
+    		BigDecimal big = CurrencyCalculatorUtil.convertStringToBigDecimal("");
+    		fail("Input field provided is not valid ");
+    	}catch (CurrencyException e) {
+    		assertThat(e.getMessage(), is("Input field provided is not valid "));
+        }
+    }
+    
+    // Test for calculateCurrencyValue Method
+    
     @Test
     public void testCalculateCurrencyValue() throws CurrencyException{
     	BigDecimal big = CurrencyCalculatorUtil.calculateCurrencyValue("AUD", "100", "CAD");
@@ -98,6 +112,9 @@ public class CurrencyCalculatorAppTest extends TestCase
     		assertThat(e.getMessage(), is("Currency details are not found in currency matrix table"));
         }
     }
+    
+    // Test for IsCurrencyAvailable Method
+    
     @Test
     public void testIsCurrencyAvailable() throws CurrencyException{
     	boolean flag = CurrencyCalculatorUtil.isCurrencyAvailable("AUD");
@@ -119,6 +136,15 @@ public class CurrencyCalculatorAppTest extends TestCase
     	assertNull(null);
     }
     @Test
+    public void testIsCurrencyAvailableWithNull() throws CurrencyException{
+    	boolean flag = CurrencyCalculatorUtil.isCurrencyAvailable(" ");
+    	assertFalse(flag);
+    	assertNotNull(flag);
+    }
+    
+ // Test for getFXPropValue Method
+    
+    @Test
     public void testGetFXPropValue() throws CurrencyException{
     	HashMap<String, String> map = LoadProperty.getFXPropValue();
     	assertNotNull(map);
@@ -133,11 +159,33 @@ public class CurrencyCalculatorAppTest extends TestCase
     	HashMap<String, String> map = LoadProperty.getFXPropValue();
     	assertNotNull(map);
     	String value = null;
-    	if(map.containsKey("")){
+    	String key ="";
+    	if(map.containsKey(key)){
     		 value = map.get("AUDUSD");
     	}
     	assertEquals(null, value);
     }
+    
+    @Test 
+    public void testValidateThatGetFXPropValueWorks() throws CurrencyException {
+    	HashMap<String, String> map = LoadProperty.getFXPropValue();
+    	assertNotNull(map);
+    }
+    @Test
+    public void testValidatesThatClassGetFXPropNotInstantiable() throws CurrencyException {
+      try{
+    	  Class cls = Class.forName("currency.calculator.app.util.LoadProperty");
+          cls.newInstance(); // exception here
+          fail("Class currency.calculator.app.CurrencyCalculatorAppTest can not access a member of class currency.calculator.app.util.LoadProperty with modifiers \"private\"");
+  		}catch (java.lang.IllegalAccessException e) {
+  			assertThat(e.getMessage(), is("Class currency.calculator.app.CurrencyCalculatorAppTest can not access a member of class currency.calculator.app.util.LoadProperty with modifiers \"private\""));
+        }catch(Exception ex){
+    	  assertThat(ex.getMessage(), is("Class currency.calculator.app.CurrencyCalculatorAppTest can not access a member of class currency.calculator.app.util.LoadProperty with modifiers \"private\""));
+       }
+    }
+    
+ // Test for main Method
+    
     @Test
     public void testCurrencyCalculatorMainApp() throws CurrencyException{
     	String[] args = { "AUD", "100", "in", "CAD" };
@@ -171,6 +219,202 @@ public class CurrencyCalculatorAppTest extends TestCase
     		//fail("Invalid input arguments provided. Please provide input only in format : <ccy1> <amount1> in <ccy2>");
     	}catch (CurrencyException e) {
     		assertThat(e.getMessage(), is("Invalid input arguments provided. Please provide input only in format : <ccy1> <amount1> in <ccy2>"));
+        }
+    }
+
+    //Test cases for getDecimalPlace method
+    
+    @Test
+    public void testGetFXRates() throws CurrencyException{
+    		double rate = CurrencyCalculatorUtil.getFXRates("AUDUSD");
+    		assertEquals(0.8371, rate);
+    	
+    }
+    @Test
+    public void testGetFXRatesWithSpaces() throws CurrencyException{
+    		double rate = CurrencyCalculatorUtil.getFXRates("CADUSD ");
+    		assertEquals(0.8711, rate);
+    	
+    }
+    @Test
+    public void testGetFXRatesWithoutCurrencyMatch() throws CurrencyException{
+    		double rate = CurrencyCalculatorUtil.getFXRates("DKKUSD");
+    		assertEquals(0.0, rate);
+    		assertNotSame(100.25, rate);
+    	
+    }
+    @Test
+    public void testGetFXRatesWithException() throws CurrencyException {
+    	try{
+    		double rate = CurrencyCalculatorUtil.getFXRates("");
+    		fail("Input field provided is not valid ");
+    	}catch (CurrencyException e) {
+    		assertThat(e.getMessage(), is("Input field provided is not valid "));
+        }
+    }
+    
+   //Test cases for getDecimalPlace method
+    
+    @Test
+    public void testGetDecimalPlace() throws CurrencyException{
+    		int decimalPlace = CurrencyCalculatorUtil.getDecimalPlace("AUD");
+    		assertEquals(2, decimalPlace);
+    	
+    }
+    @Test
+    public void testGetDecimalPlaceWithInvalidInput() throws CurrencyException{
+    		int decimalPlace = CurrencyCalculatorUtil.getDecimalPlace("JPY ");
+    		assertEquals(0, decimalPlace);
+    	
+    }
+    @Test
+    public void testGetDecimalPlaceWithoutMatch() throws CurrencyException{
+    		int decimalPlace = CurrencyCalculatorUtil.getDecimalPlace("DKKUSD");
+    		assertEquals(10, decimalPlace);
+    	
+    }
+    @Test
+    public void testGetDecimalPlaceWithException() throws CurrencyException {
+    	try{
+    		int rate = CurrencyCalculatorUtil.getDecimalPlace("");
+    		fail("Input field provided is not valid ");
+    	}catch (CurrencyException e) {
+    		assertThat(e.getMessage(), is("Input field provided is not valid "));
+        }
+    }
+    
+  //Test cases for fetchCrossCurrencyValue method
+    
+    @Test
+    public void testFetchCrossCurrencyValue() throws CurrencyException{
+    		String key = CurrencyCalculatorUtil.fetchCrossCurrencyValue("AUD","USD");
+    		assertEquals("D", key);
+    	
+    }
+    @Test
+    public void testFetchCrossCurrencyValueWithUnity() throws CurrencyException{
+    		String key = CurrencyCalculatorUtil.fetchCrossCurrencyValue("CAD","CAD");
+    		assertEquals("U", key);
+    	
+    }
+    @Test
+    public void testFetchCrossCurrencyValueWithInversion() throws CurrencyException{
+    		String key = CurrencyCalculatorUtil.fetchCrossCurrencyValue("DKK","EUR");
+    		assertEquals("I", key);
+    	
+    }
+    @Test
+    public void testFetchCrossCurrencyValueWithoutMatch() throws CurrencyException{
+    		String key = CurrencyCalculatorUtil.fetchCrossCurrencyValue("DKK","WSD");
+    		assertEquals(null, key);
+    	
+    }
+    @Test
+    public void testFetchCrossCurrencyValueWithException() throws CurrencyException {
+    	try{
+    		String key = CurrencyCalculatorUtil.fetchCrossCurrencyValue("","");
+    		fail("Input field provided is not valid ");
+    	}catch (CurrencyException e) {
+    		assertThat(e.getMessage(), is("Input field provided is not valid "));
+        }
+    }
+    
+//Test cases for calculateRateFromCrossCurrency method
+    
+    @Test
+    public void testCalculateRateFromCrossCurrency() throws CurrencyException{
+    	BigDecimal finalFXResult = BigDecimal.ZERO;
+    	finalFXResult = CurrencyCalculatorUtil.calculateRateFromCrossCurrency("GBP","JPY", "100","USD");
+    	assertEquals(18811.75850658, finalFXResult.doubleValue());
+    	
+    }
+    @Test
+    public void testCalculateRateFromCrossCurrencyWithValidInput() throws CurrencyException{
+    	BigDecimal finalFXResult = BigDecimal.ZERO;
+    	finalFXResult = CurrencyCalculatorUtil.calculateRateFromCrossCurrency("NOK","USD", "100","EUR");
+    	assertEquals(14.2121845, finalFXResult.doubleValue());
+    	
+    }
+    @Test
+    public void testCalculateRateFromCrossCurrencyWithDirectCrossRef() throws CurrencyException{
+    	BigDecimal finalFXResult = BigDecimal.ZERO;
+    	finalFXResult =  CurrencyCalculatorUtil.calculateRateFromCrossCurrency("DKK","GBP", "100","USD");
+    	assertEquals(10.55366131, finalFXResult.doubleValue());
+    	
+    }
+    @Test
+    public void testCalculateRateFromCrossCurrencyWithInvalidArgs() throws CurrencyException{
+    	try{
+    		BigDecimal finalFXResult = BigDecimal.ZERO;
+    		finalFXResult =  CurrencyCalculatorUtil.calculateRateFromCrossCurrency("NOK","JPY", "100","");
+    		fail("Input field provided is not valid ");
+    	}catch (CurrencyException e) {
+    		assertThat(e.getMessage(), is("Input field provided is not valid "));
+        }    	
+    }
+    @Test
+    public void testCalculateRateFromCrossCurrencyWithException() throws CurrencyException {
+    	try{
+    		BigDecimal finalFXResult = BigDecimal.ZERO;
+        	finalFXResult = CurrencyCalculatorUtil.calculateRateFromCrossCurrency("","", "","");
+    		fail("Input field provided is not valid ");
+    	}catch (CurrencyException e) {
+    		assertThat(e.getMessage(), is("Input field provided is not valid "));
+        }
+    }
+ 
+    //Test cases for calculateRateByCrossCurrency method
+    
+    @Test
+    public void testCalculateRateByCrossCurrency() throws CurrencyException{
+    	BigDecimal finalFXResult = BigDecimal.ZERO;
+    	finalFXResult = CurrencyCalculatorUtil.calculateRateByCrossCurrency("EUR","AUD","USD");
+    	assertEquals(1.4711504002, finalFXResult.doubleValue());
+    	
+    }
+    @Test
+    public void testCalculateRateByCrossCurrencyWithCrossRef() throws CurrencyException{
+    	BigDecimal finalFXResult = BigDecimal.ZERO;
+    	finalFXResult =  CurrencyCalculatorUtil.calculateRateByCrossCurrency("CNY","ANZ","USD");
+    	assertEquals(0.0, finalFXResult.doubleValue());
+    	
+    }
+    @Test
+    public void testCalculateRateByCrossCurrencyWithDifferentCrossRefVal() throws CurrencyException{
+    	BigDecimal finalFXResult = BigDecimal.ZERO;
+    	finalFXResult =  CurrencyCalculatorUtil.calculateRateByCrossCurrency("CZK","USD","EUR");
+    	assertEquals(0.044615039, finalFXResult.doubleValue());
+    	
+    }
+    @Test
+    public void testCalculateRateByCrossCurrencyWithUnity() throws CurrencyException{
+    	BigDecimal finalFXResult = BigDecimal.ZERO;
+    	finalFXResult = CurrencyCalculatorUtil.calculateRateByCrossCurrency("AUD","AUD","U");
+    	assertEquals(0.0, finalFXResult.doubleValue());
+    	
+    }
+    @Test
+    public void testCalculateRateByCrossCurrencyWithDirect() throws CurrencyException{
+    	BigDecimal finalFXResult = BigDecimal.ZERO;
+    	finalFXResult = CurrencyCalculatorUtil.calculateRateByCrossCurrency("GBP","USD","D");
+    	assertEquals(1.5683, finalFXResult.doubleValue());
+    	
+    }
+    @Test
+    public void testCalculateRateByCrossCurrencyWithInversion() throws CurrencyException{
+    	BigDecimal finalFXResult = BigDecimal.ZERO;
+    	finalFXResult = CurrencyCalculatorUtil.calculateRateByCrossCurrency("NOK","EUR","I");
+    	assertEquals(0.1154054771, finalFXResult.doubleValue());
+    	
+    }
+    @Test
+    public void testCalculateRateByCrossCurrencyWithException() throws CurrencyException {
+    	try{
+    		BigDecimal finalFXResult = BigDecimal.ZERO;
+        	finalFXResult =  CurrencyCalculatorUtil.calculateRateByCrossCurrency("","","");
+    		fail("Input field provided is not valid ");
+    	}catch (CurrencyException e) {
+    		assertThat(e.getMessage(), is("Input field provided is not valid "));
         }
     }
 }
